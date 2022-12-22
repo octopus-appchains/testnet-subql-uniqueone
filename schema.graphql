@@ -1,8 +1,8 @@
 type Block @entity {
   id: ID!
 
-  number: BigInt
-  timestamp: Date
+  number: BigInt @index
+  timestamp: Date @index
   parentHash: String
   specVersion: Int
 
@@ -13,12 +13,13 @@ type Block @entity {
 type Extrinsic @entity {
   id: ID!
 
-  method: String
-  section: String
+  hash: String!
+  method: String @index
+  section: String @index
   args: String
-  signer: Account #create relation to account
+  signer: Account @index #create relation to account
   nonce: BigInt
-  timestamp: Date
+  timestamp: Date @index
   signature: String
   tip: BigInt
   isSigned: Boolean
@@ -33,8 +34,8 @@ type Event @entity {
   id: ID!
 
   index: Int!
-  section: String!
-  method: String!
+  section: String! @index
+  method: String! @index
   data: String!
 
   block: Block #create relation to block
@@ -44,10 +45,10 @@ type Event @entity {
 type Call @entity {
   id: ID!
 
-  section: String
-  method: String
+  section: String @index
+  method: String @index
   args: String
-  timestamp: Date
+  timestamp: Date @index
   isSuccess: Boolean
 
   signer: Account #create ration to account
@@ -58,33 +59,68 @@ type Call @entity {
 
 type Account @entity {
   id: ID!
+  createdAt: Date!
+  nonce: Int @index
+  freeBalance: BigInt
+  reservedBalance: BigInt
+  miscFrozenBalance: BigInt
+  feeFrozenBalance: BigInt
 
   extrinsics: [Extrinsic] @derivedFrom(field: "signer")
   calls: [Call] @derivedFrom(field: "signer")
 
-  transferIn: [Transfer] @derivedFrom(field: "to")
-  transferOut: [Transfer] @derivedFrom(field: "from")
-}
-
-type Transfer @entity {
-  id: ID!
-
-  from: Account
-  to: Account
-  amount: BigInt
-
-  extrinsic: Extrinsic #create relation to extrinsic
-  call: Call #create relation to call
-  timestamp: Date
-  isSuccess: Boolean
+  transferIn: [SystemTokenTransfer] @derivedFrom(field: "to")
+  transferOut: [SystemTokenTransfer] @derivedFrom(field: "from")
 }
 
 type SystemTokenTransfer @entity {
   id: ID!
 
-  from: Account
-  to: Account
-  amount: BigInt
-  timestamp: Date
+  from: Account @index
+  to: Account @index
+  amount: BigInt @index
+  timestamp: Date @index
+  extrinsic: Extrinsic
+}
+
+type UpwardMessage @entity {
+  id: ID!
+
+  payloadType: String @index
+  payload: String
+  timestamp: Date @index
+
+  block: Block
+}
+
+type AppchainToNearTransfer @entity {
+  id: ID!
+
+  sender: Account @index
+  receiver: String @index
+  type: String @index
+  assetId: Int @index
+  amount: BigInt @index
+  collection: BigInt @index
+  item: BigInt @index
+  timestamp: Date @index
+
+  sequence: BigInt @index
+  extrinsic: Extrinsic
+}
+
+type NearToAppchainTransfer @entity {
+  id: ID!
+
+  sender: String @index
+  receiver: Account @index
+  type: String @index
+  assetId: Int @index
+  amount: BigInt @index
+  collection: BigInt @index
+  item: BigInt @index
+  timestamp: Date @index
+  sequence: BigInt @index
+
   extrinsic: Extrinsic
 }

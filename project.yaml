@@ -1,6 +1,13 @@
-specVersion: 0.2.0
+specVersion: 1.0.0
 name: testnet-subql-uniqueone
-version: 0.0.4
+version: 1.0.0
+runner:
+  node:
+    name: "@subql/node"
+    version: ">=1.13.3"
+  query:
+    name: "@subql/query"
+    version: "*"
 description: This project can be use as a starting po...
 repository: https://github.com/octopus-appchains/testnet-subql-uniqueone.git
 schema:
@@ -8,21 +15,12 @@ schema:
 network:
   endpoint: >-
     wss://gateway.testnet.octopus.network/uniqueone/e83rnqoi4hr65cwx46a83u6a7a970dgq
-  genesisHash: "0x10bfb9af1771fb58841d86209cc7e2055179d34b1aecddce4d45f5f793c02d83"
+  genesisHash: "0x9b834b6f1a2d1fd3fc702fdf76f26c785540dfd2089a00fc7e6d98ecfdb027fd"
 dataSources:
   - kind: substrate/Runtime
-    startBlock: 1
+    startBlock: 300000
     mapping:
       file: ./dist/index.js
       handlers:
         - handler: handleBlock
           kind: substrate/BlockHandler
-        - handler: handleEvent
-          kind: substrate/EventHandler
-        - handler: handleCall
-          kind: substrate/CallHandler
-        - handler: systemTokenTransferEvent
-          kind: substrate/EventHandler
-          filter:
-            module: balances
-            method: Transfer
