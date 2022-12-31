@@ -85,16 +85,47 @@ type SystemTokenTransfer @entity {
 
 type UpwardMessage @entity {
   id: ID!
+  sequence: Int @index
 
   payloadType: String @index
   payload: String
   timestamp: Date @index
+  block: Block
+}
 
+type BridgeMessageEvent @entity {
+  id: ID!
+  sequence: Int @index
+
+  eventType: String @index
+  timestamp: Date @index
+  block: Block
+
+  eraEvents: [EraEvent] @derivedFrom(field: "bridgeMessageEvent")
+  appchainToNearTransfers: [AppchainToNearTransfer]
+    @derivedFrom(field: "bridgeMessageEvent")
+}
+
+type LastBridgeMessageEventSequence @entity {
+  id: ID!
+  sequence: Int @index
+}
+
+type EraEvent @entity {
+  id: ID!
+  sequence: Int @index
+  bridgeMessageEvent: BridgeMessageEvent
+
+  eventType: String @index
+  eraIndex: Int @index
+  timestamp: Date @index
   block: Block
 }
 
 type AppchainToNearTransfer @entity {
   id: ID!
+  sequence: Int @index
+  bridgeMessageEvent: BridgeMessageEvent
 
   sender: Account @index
   receiver: String @index
@@ -102,15 +133,15 @@ type AppchainToNearTransfer @entity {
   assetId: Int @index
   amount: BigInt @index
   collection: BigInt @index
-  item: BigInt @index
+  item: BigInt
+  fee: BigInt
   timestamp: Date @index
-
-  sequence: BigInt @index
   extrinsic: Extrinsic
 }
 
 type NearToAppchainTransfer @entity {
   id: ID!
+  sequence: Int @index
 
   sender: String @index
   receiver: Account @index
@@ -120,7 +151,5 @@ type NearToAppchainTransfer @entity {
   collection: BigInt @index
   item: BigInt @index
   timestamp: Date @index
-  sequence: BigInt @index
-
   extrinsic: Extrinsic
 }

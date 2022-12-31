@@ -13,7 +13,7 @@ import {
 } from "../types";
 import { handleCalls } from './calls';
 import { handleSystemTokenTransfer } from './systemTokenTransfer';
-import { handleAppchainToNearTransfer, handleNearToAppchainTransfer } from './bridgeEvents';
+import { handleAppchainToNearAccount, handleNearToAppchainTransfer } from './bridgeEvents';
 import { handleEvent } from './event';
 import _ from "lodash";
 
@@ -43,7 +43,6 @@ export function handleExtrinsic(
   newCalls: Call[],
   newEvents: Event[],
   newSystemTokenTransfers: SystemTokenTransfer[],
-  newAppchainToNearTransfers: AppchainToNearTransfer[],
   newNearToAppchainTransfers: NearToAppchainTransfer[],
   accountIdMap: AccountIdMap
 } {
@@ -66,7 +65,7 @@ export function handleExtrinsic(
 
   const newEvents = [];
   const newSystemTokenTransfers = [];
-  const newAppchainToNearTransfers = [];
+  const newAppchainToNearAccounts = [];
   const newNearToAppchainTransfers = [];
   extrinsic.events
     .forEach((evt, idx) => {
@@ -76,10 +75,10 @@ export function handleExtrinsic(
       }
       if (evt.event.section === "octopusBridge") {
         if (["Locked", "Nep141Burned", "NonfungibleLocked"].includes(evt.event.method)) {
-          newAppchainToNearTransfers.push(handleAppchainToNearTransfer(block, extrinsic, evt, extrinsicId, startEvtIdx + idx))
+          newAppchainToNearAccounts.push(handleAppchainToNearAccount(evt.event))
         }
         if (["Unlocked", "Nep141Minted", "NonfungibleUnlocked"].includes(evt.event.method)) {
-          newNearToAppchainTransfers.push(handleNearToAppchainTransfer(block, extrinsic, evt, extrinsicId, startEvtIdx + idx))
+          newNearToAppchainTransfers.push(handleNearToAppchainTransfer(block, extrinsic, evt.event, extrinsicId, startEvtIdx + idx))
         }
       }
     });
@@ -92,9 +91,8 @@ export function handleExtrinsic(
     accountIdMap[t.toId] = null;
   });
 
-  newAppchainToNearTransfers.forEach(t => {
+  newAppchainToNearAccounts.forEach(t => {
     accountIdMap[t.senderId] = null;
-
   });
 
   newNearToAppchainTransfers.forEach(t => {
@@ -106,7 +104,6 @@ export function handleExtrinsic(
     newCalls,
     newEvents,
     newSystemTokenTransfers,
-    newAppchainToNearTransfers,
     newNearToAppchainTransfers,
     accountIdMap
   };

@@ -1,6 +1,5 @@
 import { EventRecord } from "@polkadot/types/interfaces";
-import { AccountId, Balance } from '@polkadot/types/interfaces/runtime';
-import { SubstrateExtrinsic, SubstrateBlock } from "@subql/types";
+import { SubstrateBlock } from "@subql/types";
 import { UpwardMessage } from "../types";
 import _ from "lodash";
 
@@ -11,7 +10,8 @@ export function handleUpwardMessages(
   const { event: { data } } = event;
   const humanData: any = data.toHuman();
   return humanData.data.map(({ nonce, payloadType, payload }: any) => {
-    const newUpwardMessage = new UpwardMessage(nonce.replaceAll('\\', ''));
+    const newUpwardMessage = new UpwardMessage(nonce.replaceAll(',', ''));
+    newUpwardMessage.sequence = Number(nonce.replaceAll(',', ''));
     newUpwardMessage.payloadType = payloadType.toString();
     newUpwardMessage.payload = payload.toString();
 
